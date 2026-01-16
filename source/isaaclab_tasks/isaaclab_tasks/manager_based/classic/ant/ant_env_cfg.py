@@ -24,6 +24,10 @@ import isaaclab_tasks.manager_based.classic.humanoid.mdp as mdp
 from isaaclab_assets.robots.ant import ANT_CFG  # isort: skip
 
 
+def base_height_reward(env):
+    return mdp.base_pos_z(env).squeeze(-1)
+
+
 @configclass
 class MySceneCfg(InteractiveSceneCfg):
     """Configuration for the terrain scene with an ant robot."""
@@ -62,8 +66,8 @@ class MySceneCfg(InteractiveSceneCfg):
 class ActionsCfg:
     """Action specifications for the MDP."""
 
-    joint_effort = mdp.JointEffortActionCfg(asset_name="robot", joint_names=[".*"], scale=7.5)
-
+    # ensures the motors are strong enough to lift the body against gravity.
+    joint_effort = mdp.JointEffortActionCfg(asset_name="robot", joint_names=[".*"], scale=15.0)
 
 @configclass
 class ObservationsCfg:
@@ -124,17 +128,19 @@ class EventCfg:
 @configclass
 class RewardsCfg:
     """Reward terms for the MDP."""
+    # Reward for height 
+    base_height = RewTerm(func=base_height_reward, weight=5.0)
 
     # (1) Reward for moving forward
-    progress = RewTerm(func=mdp.progress_reward, weight=1.0, params={"target_pos": (1000.0, 0.0, 0.0)})
+    # progress = RewTerm(func=mdp.progress_reward, weight=1.0, params={"target_pos": (1000.0, 0.0, 0.0)})
     # (2) Stay alive bonus
-    alive = RewTerm(func=mdp.is_alive, weight=0.5)
+    # alive = RewTerm(func=mdp.is_alive, weight=0.5)
     # (3) Reward for non-upright posture
-    upright = RewTerm(func=mdp.upright_posture_bonus, weight=0.1, params={"threshold": 0.93})
+    # upright = RewTerm(func=mdp.upright_posture_bonus, weight=0.1, params={"threshold": 0.93})
     # (4) Reward for moving in the right direction
-    move_to_target = RewTerm(
-        func=mdp.move_to_target_bonus, weight=0.5, params={"threshold": 0.8, "target_pos": (1000.0, 0.0, 0.0)}
-    )
+    # move_to_target = RewTerm(
+    #     func=mdp.move_to_target_bonus, weight=0.5, params={"threshold": 0.8, "target_pos": (1000.0, 0.0, 0.0)}
+    # )
     # (5) Penalty for large action commands
     action_l2 = RewTerm(func=mdp.action_l2, weight=-0.005)
     # (6) Penalty for energy consumption

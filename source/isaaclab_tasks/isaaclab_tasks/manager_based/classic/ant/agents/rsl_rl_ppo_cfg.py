@@ -11,7 +11,7 @@ from isaaclab_rl.rsl_rl import RslRlOnPolicyRunnerCfg, RslRlPpoActorCriticCfg, R
 @configclass
 class AntPPORunnerCfg(RslRlOnPolicyRunnerCfg):
     num_steps_per_env = 32
-    max_iterations = 1000
+    max_iterations = 200
     save_interval = 50
     experiment_name = "ant"
     policy = RslRlPpoActorCriticCfg(
